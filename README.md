@@ -27,7 +27,7 @@ Editing Niri's configuration file by hand works perfectly fine—until you find 
 - переведены диалоги, тосты и сообщения об ошибках;
 - добавлено исправление для NixOS: сохранение конфигурации работает даже когда файл `config.kdl` — это симлинк на read-only каталог `/nix/store` (см. [NixOS & Home Manager](#nixos--home-manager)).
 
-*Скриншот интерфейса будет добавлен.*
+![NiriMod интерфейс на русском](media/nirimod_ru.png)
 
 ---
 
