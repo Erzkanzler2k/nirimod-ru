@@ -300,14 +300,31 @@ def os_geteuid() -> int:
 
 
 def _nix_profile_list_from_json(raw: str) -> list[InstalledPackage]:
-    """Parse the output of ``nix profile list --json``."""
+    """Parse the output of ``nix profile list --json``.
+
+    Supports both the legacy array form and the newer object form
+    ``{"elements": {"name": {...}}}``.
+    """
     try:
         data = json.loads(raw or "[]")
     except json.JSONDecodeError:
         return []
 
+    if isinstance(data, dict):
+        elements = data.get("elements", data)
+    else:
+        elements = data
+    if isinstance(elements, dict):
+        entries = [
+            {**meta, "name": key}
+            for key, meta in elements.items()
+            if isinstance(meta, dict)
+        ]
+    else:
+        entries = elements if isinstance(elements, list) else []
+
     result: list[InstalledPackage] = []
-    for entry in data:
+    for entry in entries:
         if not isinstance(entry, dict):
             continue
         name = entry.get("name") or ""

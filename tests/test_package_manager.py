@@ -47,6 +47,23 @@ class TestInstalledPackages(unittest.TestCase):
         self.assertEqual(_nix_profile_list_from_json("[]"), [])
         self.assertEqual(_nix_profile_list_from_json("not json"), [])
 
+    def test_new_object_format(self):
+        obj = json.dumps(
+            {
+                "version": 2,
+                "elements": {
+                    "nirimod": {
+                        "active": True,
+                        "priority": 5,
+                        "storePaths": ["/nix/store/4iah6512g2h51mj5sczndia2w2562mra-nirimod-0.1.0"],
+                    }
+                },
+            }
+        )
+        packages = _nix_profile_list_from_json(obj)
+        self.assertEqual(len(packages), 1)
+        self.assertEqual(packages[0].name, "nirimod")
+
 
 class TestDetection(unittest.TestCase):
     def test_detect_unknown(self):
