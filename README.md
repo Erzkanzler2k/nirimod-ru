@@ -32,7 +32,8 @@ NiriMod manages your Niri config via a clean interface, allowing you to easily a
 - **Animations:** Stop guessing cubic-bezier values. The visual easing curve editor provides live previews for all of Niri's animation slots (like window open/close or workspace switches).
 - **Raw Config Editor:** Sometimes you just want to type. The built-in KDL text editor comes with undo/redo functionality and runs live validation to ensure your manual tweaks are safe.
 
-![Keybinding Management](media/2.png)
+![Keybinding Management]<img width="1209" height="977" alt="image" src="https://github.com/user-attachments/assets/1b4609b9-eb0d-45c2-89d9-74e5077b55de" />
+
 
 ---
 
@@ -47,7 +48,6 @@ We built NiriMod to be strictly non-destructive. It is designed to never break y
 
 ### Third-Party Shells & Multi-File Configs
 
-![Multi-File Configurations](media/multiple_configs.png)
 
 NiriMod natively supports advanced, multi-file setups. This includes custom visual layers and desktop shells like **Dank Material Shell (DMS)** and **Noctalia**. 
 
