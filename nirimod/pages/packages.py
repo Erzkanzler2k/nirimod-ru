@@ -9,7 +9,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk
 
 from nirimod import addons
-from nirimod.package_manager import PackageBackend, SearchResult
+from nirimod.package_manager import PackageBackend, SearchResult, load_popular_packages
 from nirimod.pages.base import BasePage
 
 
@@ -66,7 +66,22 @@ class PackagesPage(BasePage):
         content.append(status_box)
         content.append(self._log_revealer)
 
+        self._pending_search: str | None = None
+        self._start_warmup()
+
         return tb
+
+    def _start_warmup(self):
+        if not self._backend.is_nix or self._backend.warmup_done:
+            return
+
+        def _on_warmup_done(_ok: bool, _msg: str):
+            if self._pending_search:
+                query = self._pending_search
+                self._pending_search = None
+                self._do_search(query)
+
+        self._backend.warm_up_cache(on_output=self._append_log, on_done=_on_warmup_done)
 
     # ------------------------------------------------------------------ #
     # Nix packages tab
@@ -100,15 +115,34 @@ class PackagesPage(BasePage):
         self._nix_installed_grp = Adw.PreferencesGroup(title="Установленные пакеты")
         box.append(self._nix_installed_grp)
 
+        self._nix_popular_grp = Adw.PreferencesGroup(title="Популярные пакеты")
+        box.append(self._nix_popular_grp)
+
         self._nix_results_grp = Adw.PreferencesGroup(title="Результаты поиска")
         box.append(self._nix_results_grp)
 
+        self._populate_popular()
+
         return box
+
+    def _populate_popular(self):
+        popular = load_popular_packages()
+        for res in popular:
+            self._nix_popular_grp.add(self._make_result_row(res, label="Установить"))
 
     def _on_nix_search(self, *_):
         query = self._search_entry.get_text().strip()
         if not query:
             return
+        if self._backend.warmup_active:
+            self._pending_search = query
+            self._set_status(
+                "Идёт подготовка индекса Nixpkgs\u2026 поиск начнётся автоматически"
+            )
+            return
+        self._do_search(query)
+
+    def _do_search(self, query: str):
         self._set_busy(True, "Поиск\u2026")
         self._clear_group(self._nix_results_grp)
         self._backend.search(
@@ -117,25 +151,26 @@ class PackagesPage(BasePage):
             on_done=self._on_search_done,
         )
 
-    def _on_search_done(self, ok: bool, msg: str, results=None):
+    def _on_search_done(self, ok: bool, msg: str, results=None, cached=False):
         self._set_busy(False)
         self._append_log(msg)
         if not ok:
             self._set_status(msg, error=True)
             return
-        self._set_status(f"Найдено: {len(results or [])}")
+        suffix = " (из кэша)" if cached else ""
+        self._set_status(f"Найдено: {len(results or [])}{suffix}")
         self._clear_group(self._nix_results_grp)
         for res in results or []:
-            self._nix_results_grp.add(self._make_result_row(res))
+            self._nix_results_grp.add(self._make_result_row(res, label="Установить"))
 
-    def _make_result_row(self, res: SearchResult) -> Adw.ActionRow:
+    def _make_result_row(self, res: SearchResult, label: str = "Установить") -> Adw.ActionRow:
         row = Adw.ActionRow(
             title=res.short_name,
             subtitle=res.attribute_path,
         )
         if res.description:
             row.set_tooltip_text(res.description)
-        install_btn = Gtk.Button(label="Установить")
+        install_btn = Gtk.Button(label=label)
         install_btn.add_css_class("suggested-action")
         install_btn.connect(
             "clicked", lambda *_, r=res: self._install_package(r.attribute_path)

@@ -7,7 +7,9 @@ back to the caller via callbacks (dispatched on the GLib main loop).
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import shutil
 import subprocess
 import threading
@@ -15,6 +17,12 @@ from dataclasses import dataclass
 from typing import Callable
 
 NIXPKGS_CHANNEL = "nixpkgs"
+WARMUP_QUERY = "hello"
+CACHE_DIR = os.path.expanduser("~/.cache/nirimod")
+SEARCH_CACHE_DIR = os.path.join(CACHE_DIR, "search")
+POPULAR_REGISTRY = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "popular.json"
+)
 
 
 @dataclass
@@ -52,6 +60,8 @@ class PackageBackend:
     def __init__(self) -> None:
         self._manager = self._detect()
         self._lock = threading.Lock()
+        self._warmup_done = False
+        self._warmup_active = False
 
     @property
     def manager(self) -> str | None:
@@ -113,6 +123,10 @@ class PackageBackend:
         ).start()
 
     def _search_worker(self, query: str, on_output: OutputFn, on_done: DoneFn) -> None:
+        cached = _load_search_cache(query)
+        if cached is not None:
+            _idle(on_done, True, "", results=cached, cached=True)
+            return
         try:
             if self.is_nix:
                 results = self._nix_search(query, on_output)
@@ -121,7 +135,45 @@ class PackageBackend:
         except Exception as exc:  # pragma: no cover - defensive
             _idle(on_done, False, f"Ошибка поиска: {exc}")
             return
+        _save_search_cache(query, results)
         _idle(on_done, True, "", results=results)
+
+    @property
+    def warmup_active(self) -> bool:
+        return self._warmup_active
+
+    @property
+    def warmup_done(self) -> bool:
+        return self._warmup_done
+
+    def warm_up_cache(
+        self, on_output: OutputFn, on_done: DoneFn | None = None
+    ) -> None:
+        """Pre-populate Nix's eval cache in the background.
+
+        ``nix search`` evaluates the whole Nixpkgs tree on first run, which
+        can take minutes.  Warming the cache once at startup makes every
+        subsequent search run in about a second.
+        """
+        if not self.is_nix or self._warmup_done or self._warmup_active:
+            return
+        self._warmup_active = True
+
+        def _worker() -> None:
+            try:
+                self._nix_search(WARMUP_QUERY, on_output)
+                self._warmup_done = True
+                _idle(on_output, "Индекс Nixpkgs готов — поиск будет быстрым")
+                if on_done:
+                    _idle(on_done, True, "Готово")
+            except Exception:  # pragma: no cover - defensive
+                self._warmup_done = True
+                if on_done:
+                    _idle(on_done, False, "Не удалось подготовить индекс")
+            finally:
+                self._warmup_active = False
+
+        threading.Thread(target=_worker, daemon=True).start()
 
     def _nix_search(self, query: str, on_output: OutputFn) -> list[SearchResult]:
         _idle(on_output, "Поиск по Nixpkgs… первый запрос может занять время")
@@ -389,3 +441,73 @@ def _nix_profile_list_from_json(raw: str) -> list[InstalledPackage]:
             )
         )
     return result
+
+
+def _search_cache_path(query: str) -> str:
+    digest = hashlib.md5(query.encode("utf-8", errors="replace")).hexdigest()[:16]
+    return os.path.join(SEARCH_CACHE_DIR, f"{digest}.json")
+
+
+def _load_search_cache(query: str) -> list[SearchResult] | None:
+    """Return cached results for ``query`` or None when no cache exists."""
+    try:
+        with open(_search_cache_path(query), encoding="utf-8") as fh:
+            raw = json.load(fh)
+    except (OSError, json.JSONDecodeError, ValueError):
+        return None
+    results = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        results.append(
+            SearchResult(
+                attribute_path=str(item.get("attribute_path", "")),
+                name=str(item.get("name", "")),
+                description=str(item.get("description", "")),
+            )
+        )
+    return results
+
+
+def _save_search_cache(query: str, results: list[SearchResult]) -> None:
+    try:
+        os.makedirs(SEARCH_CACHE_DIR, exist_ok=True)
+        with open(_search_cache_path(query), "w", encoding="utf-8") as fh:
+            json.dump(
+                [
+                    {
+                        "attribute_path": r.attribute_path,
+                        "name": r.name,
+                        "description": r.description,
+                    }
+                    for r in results
+                ],
+                fh,
+                ensure_ascii=False,
+            )
+    except OSError:  # pragma: no cover - cache is best-effort
+        pass
+
+
+def load_popular_packages() -> list[SearchResult]:
+    """Return the bundled list of popular Nixpkgs packages (instant, offline)."""
+    try:
+        with open(POPULAR_REGISTRY, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, json.JSONDecodeError):  # pragma: no cover - bundled file
+        return []
+    results: list[SearchResult] = []
+    for item in data.get("packages", []):
+        if not isinstance(item, dict):
+            continue
+        attr = item.get("attr", "")
+        if not attr:
+            continue
+        results.append(
+            SearchResult(
+                attribute_path=attr,
+                name=item.get("name", attr),
+                description=item.get("description", ""),
+            )
+        )
+    return results

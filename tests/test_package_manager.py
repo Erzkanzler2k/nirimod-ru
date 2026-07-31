@@ -12,7 +12,10 @@ from nirimod.package_manager import (
     PackageBackend,
     SearchResult,
     _drain_stderr_for_progress,
+    _load_search_cache,
     _nix_profile_list_from_json,
+    _save_search_cache,
+    load_popular_packages,
 )
 
 
@@ -164,3 +167,24 @@ class TestDrainStderrForProgress(unittest.TestCase):
         self.assertEqual(json.loads(stdout), {"a": 1})
         self.assertIn("eval-line1", seen)
         self.assertIn("eval-line2", seen)
+
+
+class TestPopularPackages(unittest.TestCase):
+    def test_loads_bundled_list(self):
+        popular = load_popular_packages()
+        self.assertGreaterEqual(len(popular), 100)
+        for res in popular[:5]:
+            self.assertTrue(res.attribute_path)
+            self.assertTrue(res.name)
+
+    def test_search_cache_roundtrip(self):
+        query = "test-query"
+        results = [SearchResult(attribute_path="nixpkgs#hello", name="hello", description="d")]
+        with patch("nirimod.package_manager._search_cache_path", return_value="/tmp/nm-test-cache.json"):
+            _save_search_cache(query, results)
+            loaded = _load_search_cache(query)
+        self.assertEqual(len(loaded), 1)
+        self.assertEqual(loaded[0].attribute_path, "nixpkgs#hello")
+
+    def test_search_cache_missing_returns_none(self):
+        self.assertIsNone(_load_search_cache("nonexistent-query-xyz"))
