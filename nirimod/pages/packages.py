@@ -309,7 +309,12 @@ class PackagesPage(BasePage):
 
     @staticmethod
     def _clear_group(group: Adw.PreferencesGroup):
-        row = group.get_first_child()
-        while row:
+        """Remove all preference rows from a group.
+
+        ``Adw.PreferencesGroup`` does not expose a public row iterator, and
+        ``get_first_child()`` returns internal boxes.  The reliable way is to
+        keep a reference to every row we add and remove those directly.
+        """
+        rows = list(group)
+        for row in rows:
             group.remove(row)
-            row = group.get_first_child()
