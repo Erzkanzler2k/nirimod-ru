@@ -53,34 +53,46 @@ _SOURCE_SLUGS = {
 
 ANIM_GROUPS = [
     (
-        "Window Management",
+        "Управление окнами",
         [
-            ("window-open", "Window Open", "window-new-symbolic"),
-            ("window-close", "Window Close", "window-close-symbolic"),
-            ("window-movement", "Window Movement", "transform-move-symbolic"),
-            ("window-resize", "Window Resize", "view-fullscreen-symbolic"),
+            ("window-open", "Открытие окна", "window-new-symbolic"),
+            ("window-close", "Закрытие окна", "window-close-symbolic"),
+            ("window-movement", "Перемещение окна", "transform-move-symbolic"),
+            ("window-resize", "Изменение размера окна", "view-fullscreen-symbolic"),
         ],
     ),
     (
-        "Workspace",
+        "Рабочие пространства",
         [
-            ("workspace-switch", "Workspace Switch", "video-display-symbolic"),
+            (
+                "workspace-switch",
+                "Переключение рабочего пространства",
+                "video-display-symbolic",
+            ),
             (
                 "horizontal-view-movement",
-                "Horizontal View Movement",
+                "Горизонтальное перемещение вида",
                 "pan-end-symbolic",
             ),
         ],
     ),
     (
-        "Interface",
+        "Интерфейс",
         [
-            ("overview-open-close", "Overview Open/Close", "view-app-grid-symbolic"),
-            ("overview-screenshot", "Overview Screenshot", "camera-photo-symbolic"),
-            ("screenshot-ui-open", "Screenshot UI Open", "camera-photo-symbolic"),
+            (
+                "overview-open-close",
+                "Открытие/закрытие обзора",
+                "view-app-grid-symbolic",
+            ),
+            ("overview-screenshot", "Скриншот обзора", "camera-photo-symbolic"),
+            (
+                "screenshot-ui-open",
+                "Открытие интерфейса скриншота",
+                "camera-photo-symbolic",
+            ),
             (
                 "config-notification-open-close",
-                "Config Notification",
+                "Уведомление конфигурации",
                 "preferences-system-symbolic",
             ),
         ],
@@ -387,12 +399,12 @@ class AnimationsPage(BasePage):
         title_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         title_vbox.set_hexpand(True)
 
-        self._main_title = Gtk.Label(label="Animations")
+        self._main_title = Gtk.Label(label="Анимации")
         self._main_title.set_xalign(0.0)
         self._main_title.add_css_class("title-1")
         title_vbox.append(self._main_title)
 
-        self._active_preset_lbl = Gtk.Label(label="Using custom animations")
+        self._active_preset_lbl = Gtk.Label(label="Используются свои анимации")
         self._active_preset_lbl.set_xalign(0.0)
         self._active_preset_lbl.add_css_class("dim-label")
         self._active_preset_lbl.add_css_class("caption")
@@ -406,8 +418,8 @@ class AnimationsPage(BasePage):
         switcher_box.add_css_class("linked")
         switcher_box.set_valign(Gtk.Align.START)
 
-        self._btn_custom = Gtk.ToggleButton(label="Custom")
-        self._btn_presets = Gtk.ToggleButton(label="Presets")
+        self._btn_custom = Gtk.ToggleButton(label="Свои")
+        self._btn_presets = Gtk.ToggleButton(label="Пресеты")
         self._btn_presets.set_group(self._btn_custom)
 
         self._btn_custom.connect("toggled", self._on_view_toggle)
@@ -450,11 +462,11 @@ class AnimationsPage(BasePage):
     def _update_header(self):
         if self._active_preset_name:
             self._active_preset_lbl.set_label(
-                f"✨ Active preset: <b>{GLib.markup_escape_text(self._active_preset_name)}</b>"
+                f"✨ Активный пресет: <b>{GLib.markup_escape_text(self._active_preset_name)}</b>"
             )
             self._active_preset_lbl.set_use_markup(True)
         else:
-            self._active_preset_lbl.set_label("Using custom animations")
+            self._active_preset_lbl.set_label("Используются свои анимации")
             self._active_preset_lbl.set_use_markup(False)
 
         if hasattr(self, "_custom_switch_grp"):
@@ -488,12 +500,12 @@ class AnimationsPage(BasePage):
         self._custom_switch_grp = Adw.PreferencesGroup()
         self._custom_switch_grp.set_hexpand(True)
         self._custom_switch_row = Adw.ActionRow(
-            title="Community Preset Active",
-            subtitle="You are currently using a preset. Switch back to use your custom animation settings.",
+            title="Активен пресет сообщества",
+            subtitle="Сейчас используется пресет. Вернитесь, чтобы применить свои настройки анимации.",
         )
         self._custom_switch_row.add_css_class("property")
         self._custom_switch_row.set_icon_name("emblem-important-symbolic")
-        switch_btn = Gtk.Button(label="Switch to Custom")
+        switch_btn = Gtk.Button(label="Вернуться к своим")
         switch_btn.add_css_class("suggested-action")
         switch_btn.add_css_class("pill")
         switch_btn.set_valign(Gtk.Align.CENTER)
@@ -507,13 +519,13 @@ class AnimationsPage(BasePage):
 
         # ── Global Settings ──────────────────────────────────────────────────
         off_grp = Adw.PreferencesGroup(
-            title="Global Settings",
-            description="These apply to all animations universally.",
+            title="Общие настройки",
+            description="Применяются ко всем анимациям.",
         )
         off_grp.set_hexpand(True)
         off_row = Adw.SwitchRow(
-            title="Enable Animations",
-            subtitle="Toggle all desktop animations on or off",
+            title="Включить анимации",
+            subtitle="Включить или выключить все анимации рабочего стола",
         )
         off_row.set_icon_name("media-playback-start-symbolic")
         off_row.set_active(anim_node.get_child("off") is None)
@@ -527,8 +539,8 @@ class AnimationsPage(BasePage):
             value=slowdown_val, lower=0.1, upper=10.0, step_increment=0.1
         )
         slowdown_row = Adw.SpinRow(
-            title="Global Slowdown Factor",
-            subtitle="Multiply all animation durations by this factor",
+            title="Глобальный множитель замедления",
+            subtitle="Умножает длительность всех анимаций на этот коэффициент",
             adjustment=slowdown_adj,
             digits=1,
         )
@@ -547,8 +559,8 @@ class AnimationsPage(BasePage):
 
         # ── Easing Curve Editor ──────────────────────────────────────────────
         bezier_grp = Adw.PreferencesGroup(
-            title="Easing Curve Editor",
-            description="Design a custom easing curve to apply to any animation below.",
+            title="Редактор кривой плавности",
+            description="Создайте свою кривую плавности и примените её к любой анимации ниже.",
         )
         bezier_grp.set_hexpand(True)
 
@@ -578,7 +590,7 @@ class AnimationsPage(BasePage):
         # Right: quick presets
         presets_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
         presets_vbox.set_valign(Gtk.Align.CENTER)
-        preset_title = Gtk.Label(label="Quick Presets", xalign=0)
+        preset_title = Gtk.Label(label="Быстрые пресеты", xalign=0)
         preset_title.add_css_class("heading")
         presets_vbox.append(preset_title)
 
@@ -681,8 +693,8 @@ class AnimationsPage(BasePage):
         entries = self._list_local_presets()
 
         grp = Adw.PreferencesGroup(
-            title="Downloaded Presets",
-            description="Locally saved presets — apply these without an internet connection.",
+            title="Скачанные пресеты",
+            description="Локально сохранённые пресеты — применяются без подключения к интернету.",
         )
         grp.set_hexpand(True)
         grp.set_header_suffix(self._make_open_folder_btn())
@@ -690,8 +702,8 @@ class AnimationsPage(BasePage):
 
         if not entries:
             empty_row = Adw.ActionRow(
-                title="No presets downloaded yet",
-                subtitle="Use the download button (\u2193) next to any online preset below.",
+                title="Пресеты ещё не скачаны",
+                subtitle="Используйте кнопку загрузки (\u2193) рядом с любым онлайн-пресетом ниже.",
             )
             empty_row.add_prefix(
                 Gtk.Image.new_from_icon_name("folder-download-symbolic")
@@ -713,7 +725,7 @@ class AnimationsPage(BasePage):
 
     def _make_open_folder_btn(self) -> Gtk.Button:
         btn = Gtk.Button(icon_name="folder-open-symbolic")
-        btn.set_tooltip_text("Open presets folder")
+        btn.set_tooltip_text("Открыть папку пресетов")
         btn.add_css_class("flat")
         btn.add_css_class("circular")
         btn.connect(
@@ -732,7 +744,7 @@ class AnimationsPage(BasePage):
 
         # Delete button
         del_btn = Gtk.Button(icon_name="user-trash-symbolic")
-        del_btn.set_tooltip_text("Delete local copy")
+        del_btn.set_tooltip_text("Удалить локальную копию")
         del_btn.add_css_class("flat")
         del_btn.add_css_class("circular")
         del_btn.set_valign(Gtk.Align.CENTER)
@@ -743,7 +755,7 @@ class AnimationsPage(BasePage):
         row.add_suffix(del_btn)
 
         # Apply button
-        apply_btn = Gtk.Button(label="Apply")
+        apply_btn = Gtk.Button(label="Применить")
         apply_btn.add_css_class("suggested-action")
         apply_btn.add_css_class("pill")
         apply_btn.set_valign(Gtk.Align.CENTER)
@@ -758,16 +770,16 @@ class AnimationsPage(BasePage):
     def _confirm_apply_local_preset(self, entry: dict, row: Adw.ActionRow):
         try:
             dialog = Adw.AlertDialog(
-                heading=f'Apply "{entry["display_name"]}"?',
+                heading=f'Применить "{entry["display_name"]}"?',
                 body=(
-                    "This will fully replace your current animations block with the locally saved "
-                    f'"{entry["display_name"]}" preset.\n\n'
-                    "Your existing bezier curves and per-animation settings will be overwritten. "
-                    "You can undo this with Ctrl+Z."
+                    "Это полностью заменит текущий блок animations на локально сохранённый "
+                    f'пресет "{entry["display_name"]}".\n\n'
+                    "Ваши текущие кривые Безье и настройки анимаций будут перезаписаны. "
+                    "Отменить изменения можно с помощью Ctrl+Z."
                 ),
             )
-            dialog.add_response("cancel", "Cancel")
-            dialog.add_response("apply", "Apply Preset")
+            dialog.add_response("cancel", "Отмена")
+            dialog.add_response("apply", "Применить пресет")
             dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED)
             dialog.set_default_response("cancel")
             dialog.set_close_response("cancel")
@@ -787,7 +799,7 @@ class AnimationsPage(BasePage):
             kdl_text = entry["local_path"].read_text(encoding="utf-8")
             self._do_apply_kdl_preset(kdl_text, entry["display_name"], row)
         except OSError as exc:
-            self.show_toast(f"Failed to read local preset: {exc}")
+            self.show_toast(f"Не удалось прочитать локальный пресет: {exc}")
 
     def _delete_local_preset(self, entry: dict):
         try:
@@ -796,10 +808,10 @@ class AnimationsPage(BasePage):
             parent = entry["local_path"].parent
             if parent.exists() and not any(parent.iterdir()):
                 parent.rmdir()
-            self.show_toast(f"🗑 {entry['display_name']} deleted")
+            self.show_toast(f"🗑 {entry['display_name']} удалён")
             self._refresh_local_presets_group()
         except OSError as exc:
-            self.show_toast(f"Delete failed: {exc}")
+            self.show_toast(f"Не удалось удалить: {exc}")
 
     def _on_restore_previous(self, _btn):
         """Restore the animations block that was saved before the last preset apply."""
@@ -828,11 +840,11 @@ class AnimationsPage(BasePage):
             self._active_preset_name = None
             self._save_state()
             self._commit("restore previous animations")
-            self.show_toast("↩ Previous animations restored")
+            self.show_toast("↩ Предыдущие анимации восстановлены")
             self._update_header()
             self._build_custom_tab()  # Refresh UI components
         except (OSError, ValueError, IndexError, TypeError) as exc:
-            self.show_toast(f"Restore failed: {exc}")
+            self.show_toast(f"Не удалось восстановить: {exc}")
 
     def _build_preset_group(
         self,
@@ -852,14 +864,14 @@ class AnimationsPage(BasePage):
         header_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
         repo_btn = Gtk.Button(icon_name="web-browser-symbolic")
-        repo_btn.set_tooltip_text("View repository on GitHub")
+        repo_btn.set_tooltip_text("Открыть репозиторий на GitHub")
         repo_btn.add_css_class("flat")
         repo_btn.add_css_class("circular")
         repo_btn.connect("clicked", lambda _b: Gtk.show_uri(None, repo_url, 0))
         header_btns.append(repo_btn)
 
         refresh_btn = Gtk.Button(icon_name="view-refresh-symbolic")
-        refresh_btn.set_tooltip_text("Refresh preset list from GitHub")
+        refresh_btn.set_tooltip_text("Обновить список пресетов с GitHub")
         refresh_btn.add_css_class("flat")
         refresh_btn.add_css_class("circular")
         header_btns.append(refresh_btn)
@@ -871,7 +883,7 @@ class AnimationsPage(BasePage):
         spinner.start()
         spinner.set_margin_top(8)
         spinner.set_margin_bottom(8)
-        spinner_row = Adw.ActionRow(title="Fetching presets…")
+        spinner_row = Adw.ActionRow(title="Загрузка пресетов…")
         spinner_row.add_prefix(spinner)
         grp.add(spinner_row)
 
@@ -883,7 +895,7 @@ class AnimationsPage(BasePage):
             spinner.stop()
             if isinstance(result, Exception):
                 err_row = Adw.ActionRow(
-                    title="Unable to fetch presets",
+                    title="Не удалось загрузить пресеты",
                     subtitle=str(result),
                 )
                 err_row.add_prefix(
@@ -906,7 +918,7 @@ class AnimationsPage(BasePage):
             sp2.start()
             sp2.set_margin_top(8)
             sp2.set_margin_bottom(8)
-            wait_row = Adw.ActionRow(title="Fetching presets…")
+            wait_row = Adw.ActionRow(title="Загрузка пресетов…")
             wait_row.add_prefix(sp2)
             grp.add(wait_row)
 
@@ -915,7 +927,7 @@ class AnimationsPage(BasePage):
                 sp2.stop()
                 if isinstance(result, Exception):
                     err_row = Adw.ActionRow(
-                        title="Unable to fetch presets",
+                        title="Не удалось загрузить пресеты",
                         subtitle=str(result),
                     )
                     err_row.add_prefix(
@@ -938,8 +950,8 @@ class AnimationsPage(BasePage):
     def _build_nirimation_group(self) -> Adw.PreferencesGroup:
         """Build the XansiVA/nirimation presets section."""
         return self._build_preset_group(
-            title="Nirimation Community Presets",
-            description="GLSL shader animations from XansiVA/nirimation — replaces your current animations block.",
+            title="Пресеты сообщества Nirimation",
+            description="GLSL-шейдерные анимации из XansiVA/nirimation — заменяют ваш текущий блок animations.",
             fetch_fn=_fetch_nirimation_presets,
             bust_cache_attr="_nirimation_cache",
             rows_attr="_nirimation_rows",
@@ -950,8 +962,8 @@ class AnimationsPage(BasePage):
     def _build_jgarza_group(self) -> Adw.PreferencesGroup:
         """Build the jgarza9788/niri-animation-collection presets section."""
         return self._build_preset_group(
-            title="Niri Animation Collection",
-            description="Community GLSL shader presets from jgarza9788/niri-animation-collection — replaces your current animations block.",
+            title="Коллекция анимаций Niri",
+            description="Пресеты сообщества на GLSL-шейдерах из jgarza9788/niri-animation-collection — заменяют ваш текущий блок animations.",
             fetch_fn=_fetch_jgarza_presets,
             bust_cache_attr="_jgarza_cache",
             rows_attr="_jgarza_rows",
@@ -968,7 +980,7 @@ class AnimationsPage(BasePage):
 
         # Download-to-disk button
         dl_btn = Gtk.Button(icon_name="folder-download-symbolic")
-        dl_btn.set_tooltip_text("Download preset for offline use")
+        dl_btn.set_tooltip_text("Скачать пресет для офлайн-использования")
         dl_btn.add_css_class("flat")
         dl_btn.add_css_class("circular")
         dl_btn.set_valign(Gtk.Align.CENTER)
@@ -981,7 +993,7 @@ class AnimationsPage(BasePage):
         row.add_suffix(dl_btn)
 
         # Apply button
-        apply_btn = Gtk.Button(label="Apply")
+        apply_btn = Gtk.Button(label="Применить")
         apply_btn.add_css_class("suggested-action")
         apply_btn.add_css_class("pill")
         apply_btn.set_valign(Gtk.Align.CENTER)
@@ -1001,7 +1013,7 @@ class AnimationsPage(BasePage):
         dest_file = dest_dir / entry["name"]
 
         dl_btn.set_sensitive(False)
-        self.show_toast(f"Downloading {entry['display_name']}…", timeout=5)
+        self.show_toast(f"Скачивание {entry['display_name']}…", timeout=5)
 
         def _worker():
             try:
@@ -1018,35 +1030,35 @@ class AnimationsPage(BasePage):
         def _on_done(kdl_bytes, error):
             dl_btn.set_sensitive(True)
             if error:
-                self.show_toast(f"Download failed: {error}")
+                self.show_toast(f"Не удалось скачать: {error}")
                 return
             try:
                 dest_dir.mkdir(parents=True, exist_ok=True)
                 dest_file.write_bytes(kdl_bytes)
-                self.show_toast(f"{entry['display_name']} saved locally")
+                self.show_toast(f"{entry['display_name']} сохранён локально")
                 # Update the download button to show it's already saved
                 dl_btn.set_icon_name("emblem-ok-symbolic")
-                dl_btn.set_tooltip_text("Already downloaded")
+                dl_btn.set_tooltip_text("Уже скачано")
                 dl_btn.set_sensitive(False)
                 self._refresh_local_presets_group()
             except OSError as exc:
-                self.show_toast(f"Save failed: {exc}")
+                self.show_toast(f"Не удалось сохранить: {exc}")
 
         threading.Thread(target=_worker, daemon=True).start()
 
     def _confirm_apply_preset(self, entry, row, source_label="community"):
         try:
             dialog = Adw.AlertDialog(
-                heading=f'Apply "{entry["display_name"]}"?',
+                heading=f'Применить "{entry["display_name"]}"?',
                 body=(
-                    "This will fully replace your current animations block with the "
-                    f'"{entry["display_name"]}" preset from {source_label}.\n\n'
-                    "Your existing bezier curves and per-animation settings will be overwritten. "
-                    "You can undo this with Ctrl+Z."
+                    "Это полностью заменит ваш текущий блок animations на "
+                    f'пресет "{entry["display_name"]}" из {source_label}.\n\n'
+                    "Ваши текущие кривые Безье и настройки анимаций будут перезаписаны. "
+                    "Отменить изменения можно с помощью Ctrl+Z."
                 ),
             )
-            dialog.add_response("cancel", "Cancel")
-            dialog.add_response("apply", "Apply Preset")
+            dialog.add_response("cancel", "Отмена")
+            dialog.add_response("apply", "Применить пресет")
             dialog.set_response_appearance("apply", Adw.ResponseAppearance.SUGGESTED)
             dialog.set_default_response("cancel")
             dialog.set_close_response("cancel")
@@ -1062,7 +1074,7 @@ class AnimationsPage(BasePage):
 
     def _apply_nirimation_preset(self, entry, row):
         row.set_sensitive(False)
-        self.show_toast(f"Downloading {entry['display_name']}...", timeout=5)
+        self.show_toast(f"Скачивание {entry['display_name']}...", timeout=5)
 
         def _worker():
             try:
@@ -1079,7 +1091,7 @@ class AnimationsPage(BasePage):
         def _on_downloaded(kdl_text, error):
             row.set_sensitive(True)
             if error:
-                self.show_toast(f"Failed to download preset: {error}")
+                self.show_toast(f"Не удалось скачать пресет: {error}")
                 return
             self._do_apply_kdl_preset(kdl_text, entry["display_name"], row)
 
@@ -1092,7 +1104,7 @@ class AnimationsPage(BasePage):
                 (n for n in preset_nodes if n.name == "animations"), None
             )
             if preset_anim is None:
-                self.show_toast("Preset has no animations block — nothing applied.")
+                self.show_toast("В пресете нет блока animations — ничего не применено.")
                 return
 
             user_nodes = self._nodes
@@ -1125,9 +1137,9 @@ class AnimationsPage(BasePage):
             self._save_state()
             self._commit(f"preset: {display_name}")
             self._update_header()
-            self.show_toast(f"\u2728 {display_name} preset applied!")
+            self.show_toast(f"\u2728 Пресет {display_name} применён!")
         except (OSError, ValueError, IndexError, TypeError) as exc:
-            self.show_toast(f"Error applying preset: {exc}")
+            self.show_toast(f"Ошибка применения пресета: {exc}")
 
     def _apply_preset(self, curve: tuple, name: str):
         self._bezier_editor.set_curve(*curve)
@@ -1148,7 +1160,7 @@ class AnimationsPage(BasePage):
         grp.add_css_class("nm-expander")
         an = anim_node.get_child(key)
 
-        enabled_row = Adw.SwitchRow(title="Enabled")
+        enabled_row = Adw.SwitchRow(title="Включено")
         enabled_row.set_active(an is not None and an.get_child("off") is None)
         enabled_row.connect(
             "notify::active",
@@ -1159,7 +1171,7 @@ class AnimationsPage(BasePage):
         duration = an.child_arg("duration-ms") if an else 250
         dur_val = int(duration) if duration else 250
         dur_adj = Gtk.Adjustment(value=dur_val, lower=10, upper=2000, step_increment=10)
-        dur_row = Adw.SpinRow(title="Duration (ms)", adjustment=dur_adj, digits=0)
+        dur_row = Adw.SpinRow(title="Длительность (мс)", adjustment=dur_adj, digits=0)
 
         dur_row._last_val = dur_val
 
@@ -1173,7 +1185,7 @@ class AnimationsPage(BasePage):
         grp.add_row(dur_row)
 
         # Apply bezier button
-        apply_btn = Gtk.Button(label="Apply Editor Curve")
+        apply_btn = Gtk.Button(label="Применить кривую")
         apply_btn.add_css_class("flat")
         apply_btn.set_valign(Gtk.Align.CENTER)
 
@@ -1191,7 +1203,7 @@ class AnimationsPage(BasePage):
             current_curve = str(easing.args[0])
 
         apply_row = Adw.ActionRow(
-            title="Easing Curve", subtitle=current_curve if current_curve else "Default"
+            title="Кривая плавности", subtitle=current_curve if current_curve else "По умолчанию"
         )
         apply_btn.connect(
             "clicked", lambda *_, k=key, ar=apply_row: self._apply_bezier_to_anim(k, ar)
@@ -1272,7 +1284,7 @@ class AnimationsPage(BasePage):
 
         curve_str = f"{x1:.3f} {y1:.3f} {x2:.3f} {y2:.3f}"
         self._commit(f"animation {anim_key} bezier")
-        self.show_toast(f"Bezier applied to {anim_key}")
+        self.show_toast(f"Кривая Безье применена к {anim_key}")
 
         if apply_row:
             apply_row.set_subtitle(f"cubic-bezier {curve_str}")

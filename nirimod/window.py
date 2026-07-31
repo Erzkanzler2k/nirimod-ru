@@ -21,44 +21,44 @@ from nirimod.theme import CSS
 # Grouped sidebar structure: (section_title, [(page_id, icon, label), ...])
 SIDEBAR_GROUPS = [
     (
-        "Input",
+        "Ввод",
         [
-            ("input", "input-keyboard-symbolic", "Input"),
+            ("input", "input-keyboard-symbolic", "Ввод"),
             (
                 "bindings",
                 "preferences-desktop-keyboard-shortcuts-symbolic",
-                "Key Bindings",
+                "Горячие клавиши",
             ),
         ],
     ),
     (
-        "Display",
+        "Дисплей",
         [
-            ("outputs", "video-display-symbolic", "Outputs"),
-            ("appearance", "preferences-desktop-appearance-symbolic", "Appearance"),
-            ("animations", "applications-multimedia-symbolic", "Animations"),
+            ("outputs", "video-display-symbolic", "Мониторы"),
+            ("appearance", "preferences-desktop-appearance-symbolic", "Оформление"),
+            ("animations", "applications-multimedia-symbolic", "Анимации"),
         ],
     ),
     (
-        "Workspace",
+        "Рабочая область",
         [
-            ("layout", "view-grid-symbolic", "Layout"),
-            ("workspaces", "view-paged-symbolic", "Workspaces"),
-            ("window_rules", "preferences-system-symbolic", "Window Rules"),
+            ("layout", "view-grid-symbolic", "Макет"),
+            ("workspaces", "view-paged-symbolic", "Рабочие пространства"),
+            ("window_rules", "preferences-system-symbolic", "Правила окон"),
         ],
     ),
     (
-        "System",
+        "Система",
         [
-            ("startup", "system-run-symbolic", "Startup"),
-            ("environment", "preferences-other-symbolic", "Environment"),
-            ("gestures", "input-touchpad-symbolic", "Gestures & Misc"),
+            ("startup", "system-run-symbolic", "Автозапуск"),
+            ("environment", "preferences-other-symbolic", "Переменные среды"),
+            ("gestures", "input-touchpad-symbolic", "Жесты и прочее"),
         ],
     ),
     (
-        "Advanced",
+        "Дополнительно",
         [
-            ("raw_config", "text-x-generic-symbolic", "Raw Config"),
+            ("raw_config", "text-x-generic-symbolic", "Исходный конфиг"),
         ],
     ),
 ]
@@ -104,7 +104,7 @@ class NiriModWindow(Adw.ApplicationWindow):
         self._toast_overlay.set_child(root_box)
 
         self._niri_banner = Gtk.Label(
-            label="⚠  niri is not running — changes will be saved but not applied live",
+            label="⚠  niri не запущен — изменения будут сохранены, но не применятся на лету",
             xalign=0,
         )
         self._niri_banner.add_css_class("nm-niri-banner")
@@ -139,7 +139,7 @@ class NiriModWindow(Adw.ApplicationWindow):
 
         # Search bar
         self._search_entry = Gtk.SearchEntry()
-        self._search_entry.set_placeholder_text("Search settings\u2026")
+        self._search_entry.set_placeholder_text("Поиск настроек\u2026")
         self._search_entry.add_css_class("nm-search-entry")
         self._search_entry.set_margin_start(10)
         self._search_entry.set_margin_end(10)
@@ -269,35 +269,35 @@ class NiriModWindow(Adw.ApplicationWindow):
         bar.set_margin_top(6)
         bar.set_margin_bottom(6)
 
-        self._dirty_label = Gtk.Label(label="Unsaved changes")
+        self._dirty_label = Gtk.Label(label="Несохранённые изменения")
         self._dirty_label.set_hexpand(True)
         self._dirty_label.set_xalign(0.0)
         self._dirty_label.set_opacity(0.7)
         bar.append(self._dirty_label)
 
-        self._undo_btn = Gtk.Button(label="Undo")
+        self._undo_btn = Gtk.Button(label="Отменить")
         self._undo_btn.add_css_class("flat")
-        self._undo_btn.set_tooltip_text("Undo last change (Ctrl+Z)")
+        self._undo_btn.set_tooltip_text("Отменить последнее изменение (Ctrl+Z)")
         self._undo_btn.connect("clicked", lambda *_: self._do_undo())
         bar.append(self._undo_btn)
 
-        self._redo_btn = Gtk.Button(label="Redo")
+        self._redo_btn = Gtk.Button(label="Вернуть")
         self._redo_btn.add_css_class("flat")
-        self._redo_btn.set_tooltip_text("Redo (Ctrl+Shift+Z)")
+        self._redo_btn.set_tooltip_text("Повторить (Ctrl+Shift+Z)")
         self._redo_btn.set_sensitive(False)
         self._redo_btn.connect("clicked", lambda *_: self._do_redo())
         bar.append(self._redo_btn)
 
-        discard_btn = Gtk.Button(label="Discard")
+        discard_btn = Gtk.Button(label="Отбросить")
         discard_btn.add_css_class("destructive-action")
         discard_btn.add_css_class("flat")
-        discard_btn.set_tooltip_text("Revert all unsaved changes")
+        discard_btn.set_tooltip_text("Отменить все несохранённые изменения")
         discard_btn.connect("clicked", lambda *_: self._on_discard())
         bar.append(discard_btn)
 
-        save_btn = Gtk.Button(label="Save & Apply")
+        save_btn = Gtk.Button(label="Сохранить и применить")
         save_btn.add_css_class("suggested-action")
-        save_btn.set_tooltip_text("Save to config.kdl and reload niri (Ctrl+S)")
+        save_btn.set_tooltip_text("Сохранить в config.kdl и перезагрузить niri (Ctrl+S)")
         save_btn.connect("clicked", lambda *_: self._on_save())
         bar.append(save_btn)
 
@@ -561,13 +561,13 @@ class NiriModWindow(Adw.ApplicationWindow):
         self._undo_btn.set_sensitive(self.app_state.undo.can_undo())
         self._redo_btn.set_sensitive(self.app_state.undo.can_redo())
         desc = self.app_state.undo.last_description
-        self._dirty_label.set_label(f"Unsaved: {desc}" if desc else "Unsaved changes")
+        self._dirty_label.set_label(f"Не сохранено: {desc}" if desc else "Несохранённые изменения")
         self._build_search_index()
 
     def mark_clean(self):
         self.app_state.mark_clean()
         self._dirty_bar.set_visible(False)
-        self._dirty_label.set_label("Unsaved changes")
+        self._dirty_label.set_label("Несохранённые изменения")
         self._redo_btn.set_sensitive(False)
 
     def push_undo(self, description: str, before: str, after: str):
@@ -604,10 +604,10 @@ class NiriModWindow(Adw.ApplicationWindow):
                 self._build_search_index()
             self.mark_clean()
             if reload_ok:
-                self.show_toast("Config saved and applied ✓", timeout=3)
+                self.show_toast("Конфиг сохранён и применён ✓", timeout=3)
             else:
                 self.show_toast(
-                    f"Config saved, but reload failed: {reload_msg}", timeout=8
+                    f"Конфиг сохранён, но перезагрузка не удалась: {reload_msg}", timeout=8
                 )
 
         if self.app_state.is_multi_file:
@@ -623,7 +623,7 @@ class NiriModWindow(Adw.ApplicationWindow):
                     # Restore all files from snapshots
                     for p, text in snapshots.items():
                         p.write_text(text)
-                    self.show_toast(f"Validation error: {msg}", timeout=8)
+                    self.show_toast(f"Ошибка проверки: {msg}", timeout=8)
                     return
                 niri_ipc.run_in_thread(niri_ipc.load_config_file, _finish_save)
 
@@ -635,7 +635,7 @@ class NiriModWindow(Adw.ApplicationWindow):
             def _on_validated(result):
                 ok, msg = result
                 if not ok:
-                    self.show_toast(f"Validation error: {msg}", timeout=8)
+                    self.show_toast(f"Ошибка проверки: {msg}", timeout=8)
                     tmp_kdl.unlink(missing_ok=True)
                     return
                 kdl_parser.replace_config_file(tmp_kdl, kdl_parser.NIRI_CONFIG)
@@ -701,13 +701,20 @@ class NiriModWindow(Adw.ApplicationWindow):
 
     def show_toast(self, message: str, timeout: int = 3, copy_text: str | None = None):
         toast = Adw.Toast(title=message, timeout=timeout)
+        lowered = message.lower()
+        is_error = (
+            "error" in lowered
+            or "failed" in lowered
+            or "ошибк" in lowered
+            or "не удал" in lowered
+        )
         if copy_text is not None:
-            toast.set_button_label("Copy")
+            toast.set_button_label("Копировать")
             toast.connect(
                 "button-clicked", lambda *_: self.get_clipboard().set(copy_text)
             )
-        elif "error" in message.lower() or "failed" in message.lower():
-            toast.set_button_label("Copy")
+        elif is_error:
+            toast.set_button_label("Копировать")
             toast.connect(
                 "button-clicked", lambda *_: self.get_clipboard().set(message)
             )
@@ -736,15 +743,15 @@ class NiriModWindow(Adw.ApplicationWindow):
         source_files = sorted(self.app_state.source_files)
         filenames = "\n".join(f"  • <tt>{p.name}</tt>" for p in source_files)
         body = (
-            f"NiriMod will back up your original config files to\n"
+            f"NiriMod создаст резервную копию ваших исходных файлов конфигурации в\n"
             f"<tt>{baseline_dir}</tt>:\n\n"
             f"{filenames}\n"
         )
 
-        dialog = Adw.AlertDialog(heading="Welcome to NiriMod", body=body)
+        dialog = Adw.AlertDialog(heading="Добро пожаловать в NiriMod", body=body)
         dialog.set_body_use_markup(True)
-        dialog.add_response("cancel", "Not Now")
-        dialog.add_response("accept", "Create Backup")
+        dialog.add_response("cancel", "Не сейчас")
+        dialog.add_response("accept", "Создать резервную копию")
         dialog.set_response_appearance("accept", Adw.ResponseAppearance.SUGGESTED)
         dialog.set_default_response("accept")
         dialog.connect("response", self._on_onboarding_response)
@@ -761,19 +768,19 @@ class NiriModWindow(Adw.ApplicationWindow):
         from nirimod import app_settings
 
         dialog = Adw.AlertDialog(
-            heading="Enjoying NiriMod? ☕",
+            heading="Нравится NiriMod? ☕",
             body=(
-                "NiriMod is a passion project built entirely in my free time to make customizing Niri easier for everyone.\n\n"
-                "If it has improved your workflow, please consider supporting its development with a small tip on Ko-fi! "
-                "Your support directly fuels new features and keeps the project alive."
+                "NiriMod — это проект, созданный с любовью в свободное время, чтобы упростить настройку Niri для всех.\n\n"
+                "Если он улучшил ваш рабочий процесс, пожалуйста, поддержите его разработку небольшим пожертвованием на Ko-fi! "
+                "Ваша поддержка напрямую помогает новым функциям и развитию проекта."
             ),
         )
-        dialog.add_response("dismiss", "Maybe Later")
-        dialog.add_response("kofi", "Support on Ko-fi")
+        dialog.add_response("dismiss", "Может быть, позже")
+        dialog.add_response("kofi", "Поддержать на Ko-fi")
         dialog.set_response_appearance("kofi", Adw.ResponseAppearance.SUGGESTED)
         dialog.set_default_response("kofi")
 
-        dont_show_check = Gtk.CheckButton(label="Don't show this again on startup")
+        dont_show_check = Gtk.CheckButton(label="Больше не показывать при запуске")
         dont_show_check.set_active(app_settings.get("kofi_v3_dont_show", False))
         dont_show_check.set_halign(Gtk.Align.CENTER)
         dont_show_check.set_margin_top(4)
@@ -798,12 +805,12 @@ class NiriModWindow(Adw.ApplicationWindow):
             return
 
         dialog = Adw.AlertDialog(
-            heading="Update Available",
-            body=f"A new version of NiriMod is available on GitHub!\n\n<b>Latest Commit:</b>\n{GLib.markup_escape_text(commit_msg or '')}",
+            heading="Доступно обновление",
+            body=f"В GitHub доступна новая версия NiriMod!\n\n<b>Последний коммит:</b>\n{GLib.markup_escape_text(commit_msg or '')}",
         )
         dialog.set_body_use_markup(True)
-        dialog.add_response("cancel", "Later")
-        dialog.add_response("update", "Update in Terminal")
+        dialog.add_response("cancel", "Позже")
+        dialog.add_response("update", "Обновить в терминале")
         dialog.set_response_appearance("update", Adw.ResponseAppearance.SUGGESTED)
 
         def _on_response(dlg, response):
@@ -833,9 +840,9 @@ class NiriModWindow(Adw.ApplicationWindow):
                         shutil.copy2(p, dest)
                     except ValueError:
                         shutil.copy2(p, baseline_dir / p.name)
-            self.show_toast("Baseline backup created ✓")
+            self.show_toast("Базовая резервная копия создана ✓")
         except Exception as e:
-            self.show_toast(f"Backup failed: {e}", timeout=6)
+            self.show_toast(f"Не удалось создать резервную копию: {e}", timeout=6)
 
     def _on_reset_config_clicked(self, _btn=None):
         baseline_dir = self._get_baseline_dir()
@@ -850,31 +857,31 @@ class NiriModWindow(Adw.ApplicationWindow):
 
         if baseline_dir.exists():
             backups.append(
-                (baseline_dir.stat().st_mtime, baseline_dir, "Original Baseline")
+                (baseline_dir.stat().st_mtime, baseline_dir, "Исходная базовая версия")
             )
 
         if not backups:
-            self.show_toast("No backups available to restore.")
+            self.show_toast("Нет доступных резервных копий для восстановления.")
             return
 
         prefs_win = Adw.PreferencesWindow()
-        prefs_win.set_title("Restore Backup")
+        prefs_win.set_title("Восстановление из резервной копии")
         prefs_win.set_modal(True)
         prefs_win.set_transient_for(self)
         prefs_win.set_default_size(500, 400)
 
         page = Adw.PreferencesPage()
         grp = Adw.PreferencesGroup(
-            title="Available Backups",
-            description="Select a backup to restore your configuration from.",
+            title="Доступные резервные копии",
+            description="Выберите резервную копию для восстановления конфигурации.",
         )
 
         for _, path, name in backups:
             row = Adw.ActionRow(title=name)
-            if name == "Original Baseline":
-                row.set_subtitle("Taken on first launch")
+            if name == "Исходная базовая версия":
+                row.set_subtitle("Создана при первом запуске")
 
-            restore_btn = Gtk.Button(label="Restore")
+            restore_btn = Gtk.Button(label="Восстановить")
             restore_btn.set_valign(Gtk.Align.CENTER)
             restore_btn.add_css_class("flat")
             restore_btn.add_css_class("suggested-action")
@@ -891,11 +898,11 @@ class NiriModWindow(Adw.ApplicationWindow):
     def _confirm_restore(self, backup_dir, parent_dialog):
         parent_dialog.close()
         dialog = Adw.AlertDialog(
-            heading="Confirm Restore",
-            body="Your current configuration will be replaced by this backup. You may want to manually save your current work first.",
+            heading="Подтвердить восстановление",
+            body="Ваша текущая конфигурация будет заменена этой резервной копией. Рекомендуется сначала сохранить текущие изменения вручную.",
         )
-        dialog.add_response("cancel", "Cancel")
-        dialog.add_response("restore", "Restore")
+        dialog.add_response("cancel", "Отмена")
+        dialog.add_response("restore", "Восстановить")
         dialog.set_response_appearance("restore", Adw.ResponseAppearance.DESTRUCTIVE)
         dialog.connect(
             "response",
@@ -913,29 +920,29 @@ class NiriModWindow(Adw.ApplicationWindow):
             self.app_state.reload_from_disk()
             self.notify_nodes_changed()
             self.mark_clean()
-            self.show_toast("Config restored from backup ✓")
+            self.show_toast("Конфигурация восстановлена из резервной копии ✓")
         except Exception as e:
-            self.show_toast(f"Restore failed: {e}", timeout=6)
+            self.show_toast(f"Не удалось восстановить: {e}", timeout=6)
 
     def _open_preferences(self):
         from nirimod import app_settings
 
         prefs_win = Adw.PreferencesWindow()
-        prefs_win.set_title("NiriMod Preferences")
+        prefs_win.set_title("Настройки NiriMod")
         prefs_win.set_modal(True)
         prefs_win.set_transient_for(self)
         prefs_win.set_default_size(500, 400)
 
-        page = Adw.PreferencesPage(title="General", icon_name="emblem-system-symbolic")
+        page = Adw.PreferencesPage(title="Общие", icon_name="emblem-system-symbolic")
 
         updates_grp = Adw.PreferencesGroup(
-            title="Updates",
-            description="Control how NiriMod checks for new versions",
+            title="Обновления",
+            description="Управление проверкой новых версий NiriMod",
         )
 
         auto_update_row = Adw.SwitchRow(
-            title="Check for Updates Automatically",
-            subtitle="Checks the GitHub repository for new commits on launch",
+            title="Проверять обновления автоматически",
+            subtitle="Проверяет репозиторий GitHub на новые коммиты при запуске",
         )
         auto_update_row.set_active(app_settings.get("auto_update", True))
         auto_update_row.connect(
@@ -946,17 +953,17 @@ class NiriModWindow(Adw.ApplicationWindow):
         page.add(updates_grp)
 
         config_grp = Adw.PreferencesGroup(
-            title="Configuration File",
-            description="Manage Niri configuration paths and backups",
+            title="Файл конфигурации",
+            description="Управление путями к конфигурации Niri и резервными копиями",
         )
 
-        config_path_row = Adw.ActionRow(title="Config Path")
+        config_path_row = Adw.ActionRow(title="Путь к конфигу")
         current_path = app_settings.get("config_path", "")
         config_path_row.set_subtitle(
-            current_path if current_path else "Default (~/.config/niri/config.kdl)"
+            current_path if current_path else "По умолчанию (~/.config/niri/config.kdl)"
         )
 
-        browse_btn = Gtk.Button(label="Browse...")
+        browse_btn = Gtk.Button(label="Обзор...")
         browse_btn.set_valign(Gtk.Align.CENTER)
         browse_btn.connect(
             "clicked", lambda _b: self._on_browse_config(prefs_win, config_path_row)
@@ -965,19 +972,19 @@ class NiriModWindow(Adw.ApplicationWindow):
 
         clear_btn = Gtk.Button(icon_name="edit-clear-symbolic")
         clear_btn.set_valign(Gtk.Align.CENTER)
-        clear_btn.set_tooltip_text("Reset to default")
+        clear_btn.set_tooltip_text("Сбросить на значение по умолчанию")
         clear_btn.connect("clicked", lambda _b: self._on_clear_config(config_path_row))
         config_path_row.add_suffix(clear_btn)
 
         config_grp.add(config_path_row)
 
-        backup_path_row = Adw.ActionRow(title="Backup Directory")
+        backup_path_row = Adw.ActionRow(title="Каталог резервных копий")
         current_backup = app_settings.get("backup_path", "")
         backup_path_row.set_subtitle(
-            current_backup if current_backup else "Default (~/.config/nirimod/backups)"
+            current_backup if current_backup else "По умолчанию (~/.config/nirimod/backups)"
         )
 
-        browse_backup_btn = Gtk.Button(label="Browse...")
+        browse_backup_btn = Gtk.Button(label="Обзор...")
         browse_backup_btn.set_valign(Gtk.Align.CENTER)
         browse_backup_btn.connect(
             "clicked", lambda _b: self._on_browse_backup_dir(prefs_win, backup_path_row)
@@ -986,7 +993,7 @@ class NiriModWindow(Adw.ApplicationWindow):
 
         clear_backup_btn = Gtk.Button(icon_name="edit-clear-symbolic")
         clear_backup_btn.set_valign(Gtk.Align.CENTER)
-        clear_backup_btn.set_tooltip_text("Reset to default")
+        clear_backup_btn.set_tooltip_text("Сбросить на значение по умолчанию")
         clear_backup_btn.connect(
             "clicked", lambda _b: self._on_clear_backup_dir(backup_path_row)
         )
@@ -995,8 +1002,8 @@ class NiriModWindow(Adw.ApplicationWindow):
         config_grp.add(backup_path_row)
 
         auto_backup_row = Adw.SwitchRow(
-            title="Automatic Backups",
-            subtitle="Create a timestamped backup before saving",
+            title="Автоматические резервные копии",
+            subtitle="Создавать резервную копию с меткой времени перед сохранением",
         )
         auto_backup_row.set_active(app_settings.get("auto_backup", True))
         auto_backup_row.connect(
@@ -1006,8 +1013,8 @@ class NiriModWindow(Adw.ApplicationWindow):
         config_grp.add(auto_backup_row)
 
         backup_limit_row = Adw.SpinRow(
-            title="Backup Limit",
-            subtitle="Maximum number of backups to keep per file (0 = unlimited)",
+            title="Лимит резервных копий",
+            subtitle="Максимальное количество резервных копий на файл (0 = без ограничений)",
             digits=0,
         )
         backup_limit_row.set_adjustment(
@@ -1039,9 +1046,9 @@ class NiriModWindow(Adw.ApplicationWindow):
         from nirimod import app_settings
 
         dialog = Gtk.FileDialog()
-        dialog.set_title("Select Niri Config")
+        dialog.set_title("Выберите конфигурацию Niri")
         f = Gtk.FileFilter()
-        f.set_name("KDL files")
+        f.set_name("Файлы KDL")
         f.add_pattern("*.kdl")
         filters = Gio.ListStore.new(Gtk.FileFilter)
         filters.append(f)
@@ -1055,7 +1062,7 @@ class NiriModWindow(Adw.ApplicationWindow):
                     app_settings.set("config_path", path)
                     row.set_subtitle(path)
                     self.show_toast(
-                        "Restart NiriMod to use the new config path.", timeout=5
+                        "Перезапустите NiriMod, чтобы использовать новый путь конфигурации.", timeout=5
                     )
             except GLib.Error:
                 pass
@@ -1066,7 +1073,7 @@ class NiriModWindow(Adw.ApplicationWindow):
         from nirimod import app_settings
 
         dialog = Gtk.FileDialog()
-        dialog.set_title("Select Backup Directory")
+        dialog.set_title("Выберите каталог резервных копий")
 
         def _on_response(dialog, result):
             try:
@@ -1079,7 +1086,7 @@ class NiriModWindow(Adw.ApplicationWindow):
                         config_path=app_settings.get("config_path", ""),
                         backup_path=path,
                     )
-                    self.show_toast("Backup directory updated.", timeout=3)
+                    self.show_toast("Каталог резервных копий обновлён.", timeout=3)
             except GLib.Error:
                 pass
 
@@ -1089,21 +1096,21 @@ class NiriModWindow(Adw.ApplicationWindow):
         from nirimod import app_settings
 
         app_settings.set("backup_path", "")
-        row.set_subtitle("Default (~/.config/nirimod/backups)")
+        row.set_subtitle("По умолчанию (~/.config/nirimod/backups)")
         kdl_parser.set_paths(
             config_path=app_settings.get("config_path", ""), backup_path=""
         )
-        self.show_toast("Backup directory reset to default.", timeout=3)
+        self.show_toast("Каталог резервных копий сброшен на значение по умолчанию.", timeout=3)
 
     def _on_clear_config(self, row):
         from nirimod import app_settings
 
         app_settings.set("config_path", "")
-        row.set_subtitle("Default (~/.config/niri/config.kdl)")
-        self.show_toast("Restart NiriMod to use the default config path.", timeout=5)
+        row.set_subtitle("По умолчанию (~/.config/niri/config.kdl)")
+        self.show_toast("Перезапустите NiriMod, чтобы использовать путь конфигурации по умолчанию.", timeout=5)
 
     def _on_profiles_clicked(self, _btn=None):
-        dialog = Adw.AlertDialog(heading="Profiles")
+        dialog = Adw.AlertDialog(heading="Профили")
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         box.set_margin_start(4)
@@ -1111,10 +1118,10 @@ class NiriModWindow(Adw.ApplicationWindow):
 
         names = prof_mod.list_profiles()
         if names:
-            grp = Adw.PreferencesGroup(title="Saved Profiles")
+            grp = Adw.PreferencesGroup(title="Сохранённые профили")
             for name in names:
                 row = Adw.ActionRow(title=name)
-                load_btn = Gtk.Button(label="Load")
+                load_btn = Gtk.Button(label="Загрузить")
                 load_btn.set_valign(Gtk.Align.CENTER)
                 load_btn.add_css_class("flat")
                 load_btn.connect(
@@ -1134,9 +1141,9 @@ class NiriModWindow(Adw.ApplicationWindow):
 
         save_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         save_row.set_margin_top(8)
-        entry = Gtk.Entry(placeholder_text="New profile name…")
+        entry = Gtk.Entry(placeholder_text="Название нового профиля…")
         entry.set_hexpand(True)
-        save_btn = Gtk.Button(label="Save Current")
+        save_btn = Gtk.Button(label="Сохранить текущий")
         save_btn.add_css_class("suggested-action")
         save_btn.connect(
             "clicked", lambda _b: self._save_profile(entry.get_text(), dialog)
@@ -1146,7 +1153,7 @@ class NiriModWindow(Adw.ApplicationWindow):
         box.append(save_row)
 
         dialog.set_extra_child(box)
-        dialog.add_response("close", "Close")
+        dialog.add_response("close", "Закрыть")
         dialog.present(self)
 
     def _save_profile(self, name: str, dialog):
@@ -1154,18 +1161,18 @@ class NiriModWindow(Adw.ApplicationWindow):
         if not name:
             return
         prof_mod.save_profile(name, source_files=self.app_state.source_files)
-        self.show_toast(f"Profile '{name}' saved ✓")
+        self.show_toast(f"Профиль «{name}» сохранён ✓")
 
     def _load_profile(self, name: str, dialog):
         if prof_mod.load_profile(name):
             self.notify_nodes_changed()
             self.mark_dirty()
-            self.show_toast(f"Profile '{name}' loaded")
+            self.show_toast(f"Профиль «{name}» загружен")
         dialog.close()
 
     def _delete_profile(self, name: str, dialog):
         prof_mod.delete_profile(name)
-        self.show_toast(f"Profile '{name}' deleted")
+        self.show_toast(f"Профиль «{name}» удалён")
 
         extra = dialog.get_extra_child()
         if extra:
@@ -1175,10 +1182,10 @@ class NiriModWindow(Adw.ApplicationWindow):
         box.set_margin_end(4)
         names = prof_mod.list_profiles()
         if names:
-            grp = Adw.PreferencesGroup(title="Saved Profiles")
+            grp = Adw.PreferencesGroup(title="Сохранённые профили")
             for n in names:
                 row = Adw.ActionRow(title=n)
-                load_btn = Gtk.Button(label="Load")
+                load_btn = Gtk.Button(label="Загрузить")
                 load_btn.set_valign(Gtk.Align.CENTER)
                 load_btn.add_css_class("flat")
                 load_btn.connect(
@@ -1197,9 +1204,9 @@ class NiriModWindow(Adw.ApplicationWindow):
             box.append(grp)
         save_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         save_row.set_margin_top(8)
-        entry = Gtk.Entry(placeholder_text="New profile name\u2026")
+        entry = Gtk.Entry(placeholder_text="Название нового профиля…")
         entry.set_hexpand(True)
-        save_btn = Gtk.Button(label="Save Current")
+        save_btn = Gtk.Button(label="Сохранить текущий")
         save_btn.add_css_class("suggested-action")
         save_btn.connect(
             "clicked", lambda _b: self._save_profile(entry.get_text(), dialog)

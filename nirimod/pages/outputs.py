@@ -61,16 +61,16 @@ class OutputsPage(BasePage):
         self._drag_offset: tuple[float, float] = (0, 0)
 
     def build(self) -> Gtk.Widget:
-        tb, header, scroll, content = self._make_toolbar_page("Outputs")
+        tb, header, scroll, content = self._make_toolbar_page("Мониторы")
 
         add_fake_btn = Gtk.Button(icon_name="list-add-symbolic")
-        add_fake_btn.set_tooltip_text("Add fake monitor for testing")
+        add_fake_btn.set_tooltip_text("Добавить тестовый монитор")
         add_fake_btn.add_css_class("flat")
         add_fake_btn.connect("clicked", lambda *_: self._add_fake_monitor())
         header.pack_end(add_fake_btn)
 
         refresh_btn = Gtk.Button(icon_name="view-refresh-symbolic")
-        refresh_btn.set_tooltip_text("Reload outputs from niri")
+        refresh_btn.set_tooltip_text("Обновить список мониторов из niri")
         refresh_btn.add_css_class("flat")
         refresh_btn.connect("clicked", lambda *_: self.refresh())
         header.pack_end(refresh_btn)
@@ -95,7 +95,7 @@ class OutputsPage(BasePage):
         click.connect("pressed", self._on_canvas_click)
         self._canvas.add_controller(click)
 
-        self._out_combo = Adw.ComboRow(title="Monitor")
+        self._out_combo = Adw.ComboRow(title="Монитор")
         self._out_combo.connect("notify::selected", self._on_output_selected)
         sel_group = Adw.PreferencesGroup()
         sel_group.add(self._out_combo)
@@ -235,7 +235,7 @@ class OutputsPage(BasePage):
             cr.select_font_face("Sans", 0, 0)
             cr.set_font_size(14)
             cr.move_to(width / 2 - 80, height / 2)
-            cr.show_text("No outputs detected")
+            cr.show_text("Мониторы не обнаружены")
             return
 
         min_x = min_y = float("inf")
@@ -320,7 +320,7 @@ class OutputsPage(BasePage):
             )
             out_scale = (o.get("logical") or {}).get("scale", 1.0)
             res = f"{mode.get('width', '?')}×{mode.get('height', '?')}"
-            scale_text = f"Scale: {out_scale}x"
+            scale_text = f"Масштаб: {out_scale}x"
 
             cr.set_source_rgba(1, 1, 1, 0.95 if is_sel else 0.7)
 
@@ -604,7 +604,7 @@ class OutputsPage(BasePage):
             for m in modes
         ]
         mode_model = Gtk.StringList.new(mode_strs)
-        mode_row = Adw.ComboRow(title="Resolution &amp; Refresh Rate")
+        mode_row = Adw.ComboRow(title="Разрешение и частота обновления")
         mode_row.set_model(mode_model)
         mode_idx = output.get("current_mode")
         cur_mode = (
@@ -627,14 +627,14 @@ class OutputsPage(BasePage):
             upper=100.0,
             step_increment=0.05,
         )
-        scale_row = Adw.SpinRow(title="Scale", adjustment=scale_adj, digits=2)
+        scale_row = Adw.SpinRow(title="Масштаб", adjustment=scale_adj, digits=2)
         scale_row.connect(
             "notify::value",
             lambda r, _: self._set_output_prop(name, "scale", r.get_value()),
         )
 
         t_model = Gtk.StringList.new(TRANSFORMS)
-        transform_row = Adw.ComboRow(title="Transform", model=t_model)
+        transform_row = Adw.ComboRow(title="Трансформация", model=t_model)
         cur_t = (output.get("logical") or {}).get("transform", "normal")
         cur_t_norm = str(cur_t).lower().replace("_", "-") if cur_t else "normal"
         if cur_t_norm in TRANSFORMS:
@@ -656,8 +656,8 @@ class OutputsPage(BasePage):
         )
         self._pos_x_adj = px_adj
         self._pos_y_adj = py_adj
-        pos_x_row = Adw.SpinRow(title="Position X", adjustment=px_adj, digits=0)
-        pos_y_row = Adw.SpinRow(title="Position Y", adjustment=py_adj, digits=0)
+        pos_x_row = Adw.SpinRow(title="Позиция X", adjustment=px_adj, digits=0)
+        pos_y_row = Adw.SpinRow(title="Позиция Y", adjustment=py_adj, digits=0)
         pos_x_row.connect(
             "notify::value",
             lambda r, _: self._set_output_pos(
@@ -671,7 +671,7 @@ class OutputsPage(BasePage):
             ),
         )
 
-        vrr_row = Adw.SwitchRow(title="Variable Refresh Rate (VRR)")
+        vrr_row = Adw.SwitchRow(title="Переменная частота обновления (VRR)")
         vrr_val = (
             (out_node.get_child("variable-refresh-rate") is not None)
             if out_node
@@ -686,7 +686,7 @@ class OutputsPage(BasePage):
             ),
         )
 
-        off_row = Adw.SwitchRow(title="Disable Output")
+        off_row = Adw.SwitchRow(title="Отключить монитор")
         off_val = (out_node.get_child("off") is not None) if out_node else False
         off_row.set_active(off_val)
         safe_switch_connect(
@@ -695,7 +695,7 @@ class OutputsPage(BasePage):
             lambda enabled: self._set_output_flag(name, "off", enabled),
         )
 
-        grp = Adw.PreferencesGroup(title=f"Output: {name}")
+        grp = Adw.PreferencesGroup(title=f"Монитор: {name}")
         for r in [
             mode_row,
             scale_row,

@@ -490,7 +490,13 @@ def load_niri_config_multi() -> tuple[list[KdlNode], list[tuple[KdlNode, Path]]]
 
 def _write_target(path: Path) -> Path:
     if path.is_symlink():
-        return path.resolve(strict=False)
+        resolved = path.resolve(strict=False)
+        # On NixOS the config is often a symlink into the read-only Nix
+        # store (home-manager). In that case write through the symlink
+        # itself instead, replacing it with a regular file.
+        if os.access(resolved.parent, os.W_OK):
+            return resolved
+        return path
     return path
 
 

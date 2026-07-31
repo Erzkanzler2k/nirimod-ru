@@ -8,15 +8,15 @@ try:
     import gi
 except ModuleNotFoundError:
     print(
-        "\033[31mError: Could not find Python GObject bindings (PyGObject).\033[0m",
+        "\033[31mОшибка: не найдены привязки Python GObject (PyGObject).\033[0m",
         file=sys.stderr,
     )
     print(
-        "This application requires system-level libraries to interface with GTK4.",
+        "Это приложение требует системные библиотеки для работы с GTK4.",
         file=sys.stderr,
     )
     print(
-        "\nPlease install the required packages for your distribution:", file=sys.stderr
+        "\nУстановите необходимые пакеты для вашего дистрибутива:", file=sys.stderr
     )
     print(
         "  \033[1mArch:\033[0m   sudo pacman -S python-gobject gtk4 libadwaita",
@@ -31,7 +31,7 @@ except ModuleNotFoundError:
         file=sys.stderr,
     )
     print(
-        "\nAfter installing, re-run the installer or re-create your virtual environment.",
+        "\nПосле установки переустановите приложение или создайте виртуальное окружение заново.",
         file=sys.stderr,
     )
     sys.exit(1)
