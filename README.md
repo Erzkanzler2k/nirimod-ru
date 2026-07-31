@@ -15,6 +15,10 @@
 
 Editing Niri's configuration file by hand works perfectly fine—until you find yourself tweaking animation curves blindly, guessing the exact names of your monitors, or accidentally overlapping your keybinds. NiriMod steps in to provide a clean, native GUI for the tedious parts of configuration, while staying completely out of the way for everything else.
 
+> **🇷🇺 Русская версия:** этот репозиторий содержит полностью русифицированную сборку NiriMod. Интерфейс переведён на русский язык, а также исправлена работа с конфигурацией на NixOS (см. раздел [NixOS & Home Manager](#nixos--home-manager)).
+
+![NiriMod интерфейс на русском](media/nirimod_ru.png)
+
 ---
 
 ## What It Does
@@ -65,6 +69,8 @@ xdg.configFile."niri/config.kdl".source = config.lib.file.mkOutOfStoreSymlink "$
 
 Because NiriMod intelligently follows symlinks during saves, any changes made in the GUI will be written directly to the source file in your dotfiles directory.
 
+> **Исправление для NixOS:** если вы не используете `mkOutOfStoreSymlink` (стандартный вариант Home Manager создаёт симлинк на файл в read-only каталоге `/nix/store`), сохранение через временный файл падает с `OSError: [Errno 30] Read-only file system`. Эта сборка определяет такой случай и пишет изменения через сам симлинк, заменяя его обычным файлом. Учтите, что после первого сохранения связь с Home Manager разрывается — изменения перестанут попадать в `/nix/store`, но продолжат работать в вашем конфиге.
+
 ---
 
 ## Installation
@@ -82,6 +88,25 @@ curl -sSL https://raw.githubusercontent.com/srinivasr/nirimod/main/install.sh | 
 ```
 
 *(You can use `--install` to skip the prompts, `--uninstall` to remove the application, or `--skip-deps` if you prefer to handle dependencies manually).*
+
+### NixOS (эта сборка)
+
+Установка собранного пакета из этого репозитория (без публичного flake):
+
+```bash
+git clone https://github.com/Erzkanzler2k/nirimod-ru /tmp/nirimod-ru
+cd /tmp/nirimod-ru
+nix build           # собрать пакет, вывод появится в result/
+nix profile install ./result
+```
+
+Или, если вы собирали пакет ранее, установить напрямую из хранилища:
+
+```bash
+nix profile install /nix/store/<hash>-nirimod-0.1.0
+```
+
+Запуск: `nirimod`
 
 ---
 
