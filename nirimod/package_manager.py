@@ -298,10 +298,12 @@ def _drain_stderr_for_progress(
     captured: list[str] = []
     forwarded = 0
     PROGRESS_CAP = 5
+    stderr_stream = proc.stderr
+    stdout_stream = proc.stdout
 
     def _stderr_reader() -> None:
         nonlocal forwarded
-        for line in proc.stderr:
+        for line in stderr_stream:
             stripped = line.rstrip("\n")
             if not stripped:
                 continue
@@ -313,7 +315,7 @@ def _drain_stderr_for_progress(
                 _idle(on_output, "… выполняется поиск …")
 
     def _stdout_reader() -> None:
-        for line in proc.stdout:
+        for line in stdout_stream:
             captured.append(line)
 
     t_err = threading.Thread(target=_stderr_reader, daemon=True)
