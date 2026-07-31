@@ -124,20 +124,21 @@ class PackageBackend:
         _idle(on_done, True, "", results=results)
 
     def _nix_search(self, query: str, on_output: OutputFn) -> list[SearchResult]:
-        _idle(on_output, "Поиск по Nixpkgs… (это может занять время)")
+        _idle(on_output, "Поиск по Nixpkgs… первый запрос может занять время")
         cmd = ["nix", "search", NIXPKGS_CHANNEL, query, "--json"]
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            bufsize=1,
         )
-        _drain_until_done(proc, on_output)
+        raw_stdout = _drain_stderr_for_progress(proc, on_output)
         if proc.returncode != 0:
             return []
 
         try:
-            data = json.loads(proc.stdout or "{}")
+            data = json.loads(raw_stdout or "{}")
         except json.JSONDecodeError:
             return []
 
@@ -278,6 +279,51 @@ def _drain_until_done(proc: subprocess.Popen, on_output: OutputFn) -> None:
         if stripped:
             _idle(on_output, stripped)
     proc.wait()
+
+
+def _drain_stderr_for_progress(
+    proc: subprocess.Popen, on_output: OutputFn
+) -> str:
+    """Read stderr line by line for progress and wait for the process to finish.
+
+    Used for long-running commands (e.g. ``nix search``) whose stdout is a
+    single JSON blob produced only at the end.  stderr lines like
+    "evaluating 'legacyPackages...'" are forwarded as live progress
+    (throttled to avoid flooding the log with thousands of lines).
+    Returns the full stdout contents as a string.
+    """
+    assert proc.stdout is not None
+    assert proc.stderr is not None
+
+    captured: list[str] = []
+    forwarded = 0
+    PROGRESS_CAP = 5
+
+    def _stderr_reader() -> None:
+        nonlocal forwarded
+        for line in proc.stderr:
+            stripped = line.rstrip("\n")
+            if not stripped:
+                continue
+            if forwarded < PROGRESS_CAP:
+                forwarded += 1
+                _idle(on_output, stripped)
+            elif forwarded == PROGRESS_CAP:
+                forwarded += 1
+                _idle(on_output, "… выполняется поиск …")
+
+    def _stdout_reader() -> None:
+        for line in proc.stdout:
+            captured.append(line)
+
+    t_err = threading.Thread(target=_stderr_reader, daemon=True)
+    t_out = threading.Thread(target=_stdout_reader, daemon=True)
+    t_err.start()
+    t_out.start()
+    proc.wait()
+    t_err.join(timeout=5)
+    t_out.join(timeout=5)
+    return "".join(captured)
 
 
 def _idle(fn: Callable, *args, **kwargs) -> None:

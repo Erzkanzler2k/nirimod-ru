@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -10,6 +11,7 @@ from nirimod.package_manager import (
     InstalledPackage,
     PackageBackend,
     SearchResult,
+    _drain_stderr_for_progress,
     _nix_profile_list_from_json,
 )
 
@@ -140,3 +142,25 @@ class TestInstalledPackageData(unittest.TestCase):
         pkg = InstalledPackage(name="x", attribute_path="y", store_path="z", priority="5", original="nixpkgs")
         self.assertEqual(pkg.name, "x")
         self.assertEqual(pkg.priority, "5")
+
+
+class TestDrainStderrForProgress(unittest.TestCase):
+    def test_captures_stdout_and_throttles_progress(self):
+        proc = subprocess.Popen(
+            ["bash", "-c", "echo eval-line1 >&2; echo '{\"a\": 1}'; echo eval-line2 >&2"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        seen: list[str] = []
+
+        def _sync_idle(fn, *args, **kwargs):
+            fn(*args, **kwargs)
+
+        with patch("nirimod.package_manager._idle", side_effect=_sync_idle):
+            stdout = _drain_stderr_for_progress(proc, seen.append)
+
+        self.assertEqual(proc.returncode, 0)
+        self.assertEqual(json.loads(stdout), {"a": 1})
+        self.assertIn("eval-line1", seen)
+        self.assertIn("eval-line2", seen)
