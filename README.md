@@ -1,7 +1,7 @@
 <div align="center">
   <h1>NiriMod</h1>
-  
-  **A GTK4/libadwaita config manager for the [niri](https://github.com/niri-wm/niri) Wayland compositor.**
+
+  **Графический конфигуратор (GTK4/libadwaita) для wayland-композитора [niri](https://github.com/niri-wm/niri) с полной русской локализацией.**
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
   [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue?logo=python&logoColor=white)](https://python.org)
@@ -11,93 +11,57 @@
 
 <br>
 
-![NiriMod Interface](media/1.png)
-
-Editing Niri's configuration file by hand works perfectly fine—until you find yourself tweaking animation curves blindly, guessing the exact names of your monitors, or accidentally overlapping your keybinds. NiriMod steps in to provide a clean, native GUI for the tedious parts of configuration, while staying completely out of the way for everything else.
-
-> **🇷🇺 Русская версия:** этот репозиторий содержит полностью русифицированную сборку NiriMod. Интерфейс переведён на русский язык, а также исправлена работа с конфигурацией на NixOS (см. раздел [NixOS & Home Manager](#nixos--home-manager)).
-
----
-
-## Русская версия
-
-Полная русская локализация интерфейса NiriMod:
-
-- переведены все страницы: мониторы, горячие клавиши, анимации, правила окон, ввод, система и другие;
-- переведены диалоги, тосты и сообщения об ошибках;
-- добавлено исправление для NixOS: сохранение конфигурации работает даже когда файл `config.kdl` — это симлинк на read-only каталог `/nix/store` (см. [NixOS & Home Manager](#nixos--home-manager)).
-
 ![NiriMod интерфейс на русском](media/nirimod_ru.png)
 
----
-
-## What It Does
-
-NiriMod manages your Niri config via a clean interface, allowing you to easily adjust settings while leaving your custom scripts and comments alone.
-
-- **Display Outputs:** Visually arrange your monitors using drag-and-drop. Easily adjust your resolution, refresh rate, variable refresh rate (VRR), and fractional scaling without diving into the config file.
-- **Keybinds:** Manage your shortcuts through an interactive physical keyboard map that lights up bound keys, or use the searchable list view to quickly find and edit specific bindings.
-- **Layout & Rules:** Take control of Niri's column layout with a full editor for window rules, column proportions, gaps, struts, and workspaces.
-- **System & Input:** Adjust your mouse and touchpad settings, configure swipe gestures, change cursor themes, and manage the environment variables and startup commands Niri uses.
-- **Animations:** Stop guessing cubic-bezier values. The visual easing curve editor provides live previews for all of Niri's animation slots (like window open/close or workspace switches).
-- **Raw Config Editor:** Sometimes you just want to type. The built-in KDL text editor comes with undo/redo functionality and runs live validation to ensure your manual tweaks are safe.
-
-![Keybinding Management](media/2.png)
+Редактировать конфигурационный файл Niri вручную вполне реально — до тех пор, пока вам не приходится вслепую подбирать кривые анимаций, угадывать точные названия своих мониторов или случайно дублировать горячие клавиши. NiriMod берёт на себя скучную часть настройки, предоставляя чистый нативный интерфейс и не мешая остальному.
 
 ---
 
-## Safe, Non-Destructive Editing
+## Что умеет
 
-We built NiriMod to be strictly non-destructive. It is designed to never break your existing configuration:
+NiriMod управляет вашим конфигом Niri через понятный интерфейс, позволяя легко менять настройки, не трогая ваши скрипты и комментарии.
 
-- **Strict Validation:** Before anything is written to disk, NiriMod runs `niri validate`. If the validation fails, nothing is saved, keeping your setup safe.
-- **Atomic Writes:** Configuration files are saved using temporary files first, which prevents corruption if a save is interrupted.
-- **Comment Preservation:** Your custom comments and whitespace formatting are kept completely intact. We don't overwrite your personal notes.
-- **Profile Management:** Easily save and switch between full configuration snapshots (like a "work" profile and a "gaming" profile) with a single click.
-
-### Third-Party Shells & Multi-File Configs
-
-![Multi-File Configurations](media/multiple_configs.png)
-
-NiriMod natively supports advanced, multi-file setups. This includes custom visual layers and desktop shells like **Dank Material Shell (DMS)** and **Noctalia**. 
-
-If you like to split your configuration using `include` directives, NiriMod handles that transparently. It can parse included files up to 5 levels deep. When you make a change in the user interface, NiriMod is smart enough to track which file that specific setting came from, and it saves the change back to its exact origin. 
-
-Because NiriMod only touches the standard Niri settings it understands, your custom shell configurations, advanced scripts, and unrecognized blocks are perfectly preserved just the way you left them.
+- **Мониторы:** расставляйте мониторы перетаскиванием. Меняйте разрешение, частоту обновления, переменную частоту (VRR) и дробный масштаб, не залезая в конфиг.
+- **Горячие клавиши:** настраивайте сочетания через интерактивную карту физической клавиатуры, на которой подсвечиваются занятые клавиши, либо через список с поиском.
+- **Макет и правила:** полный редактор правил окон, пропорций колонок, отступов, struts и рабочих пространств.
+- **Система и ввод:** настройка мыши и тачпада, жесты смахивания, темы курсора, переменные окружения и команды автозапуска.
+- **Анимации:** не гадайте значения cubic-bezier. Визуальный редактор кривых с предпросмотром для всех анимаций Niri (открытие/закрытие окон, переключение рабочих пространств и т.д.).
+- **Редактор конфига:** текстовый редактор KDL с отменой/повтором и живой валидацией.
 
 ---
 
-## NixOS & Home Manager
+## Безопасное редактирование
 
-If you manage your Niri configuration through Home Manager, you can configure it so NiriMod can edit your configuration directly in your dotfiles repository. This enables a workflow where NiriMod saves changes, Niri hot-reloads instantly, and your Nix configuration source remains perfectly in sync for your next rebuild.
+NiriMod строго неразрушающий и никогда не сломает вашу существующую конфигурацию:
 
-To enable this, use the `mkOutOfStoreSymlink` helper to point to your raw KDL file instead of copying it into the read-only Nix store:
+- **Строгая валидация:** перед записью на диск запускается `niri validate`. Если валидация не проходит — ничего не сохраняется.
+- **Атомарная запись:** конфигурация сначала сохраняется во временный файл, что защищает от повреждений при прерывании.
+- **Сохранение комментариев:** ваши комментарии и форматирование остаются нетронутыми.
+- **Профили:** сохраняйте и переключайте полные снимки конфигурации (например, рабочий и игровой профили) в один клик.
+
+### Многофайловые конфигурации
+
+NiriMod поддерживает расширенные многофайловые настройки, включая визуальные оболочки **Dank Material Shell (DMS)** и **Noctalia**. При использовании `include` файлы разбираются до 5 уровней вложенности, и изменения сохраняются в тот файл, откуда пришла настройка. Незнакомые блоки и скрипты остаются в целости.
+
+---
+
+## NixOS и Home Manager
+
+Если вы управляете конфигурацией Niri через Home Manager, настройте NiriMod на редактирование исходного файла в вашем репозитории dotfiles. Тогда изменения, сделанные в GUI, мгновенно применяются Niri, а ваш Nix-конфиг остаётся синхронизированным для следующей пересборки.
+
+Для этого используйте `mkOutOfStoreSymlink`, чтобы указывать на исходный KDL-файл, а не копировать его в read-only хранилище Nix:
 
 ```nix
 xdg.configFile."niri/config.kdl".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/path/to/your/dotfiles/niri/config.kdl";
 ```
 
-Because NiriMod intelligently follows symlinks during saves, any changes made in the GUI will be written directly to the source file in your dotfiles directory.
+NiriMod умно следует симлинкам при сохранении, поэтому изменения из GUI попадают прямо в исходный файл в ваших dotfiles.
 
 **Исправление для NixOS (встроено в эту сборку):** если вы не используете `mkOutOfStoreSymlink` (стандартный вариант Home Manager создаёт симлинк на файл в read-only каталоге `/nix/store`), сохранение через временный файл падает с `OSError: [Errno 30] Read-only file system`. Эта сборка определяет такой случай и пишет изменения через сам симлинк, заменяя его обычным файлом. Учтите, что после первого сохранения связь с Home Manager разрывается — изменения перестанут попадать в `/nix/store`, но продолжат работать в вашем конфиге.
 
 ---
 
-## Installation
-
-### AUR (Arch Linux)
-
-```bash
-yay -S nirimod-git
-```
-
-### Script (Other Distros)
-
-```bash
-curl -sSL https://raw.githubusercontent.com/srinivasr/nirimod/main/install.sh | bash
-```
-
-*(You can use `--install` to skip the prompts, `--uninstall` to remove the application, or `--skip-deps` if you prefer to handle dependencies manually).*
+## Установка
 
 ### NixOS (эта сборка)
 
@@ -118,16 +82,30 @@ nix profile install /nix/store/<hash>-nirimod-0.1.0
 
 Запуск: `nirimod`
 
+### AUR (Arch Linux)
+
+```bash
+yay -S nirimod-git
+```
+
+### Скрипт (другие дистрибутивы)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/srinivasr/nirimod/main/install.sh | bash
+```
+
+*(`--install` — установка без вопросов, `--uninstall` — удаление, `--skip-deps` — если зависимости уже установлены).*
+
 ---
 
-## Requirements
+## Требования
 
-NiriMod works out of the box on Arch, Fedora, openSUSE, and Debian/Ubuntu. You will need:
-- Python 3.12+ and `uv` (the install script handles `uv` for you)
-- GTK4, libadwaita, PyGObject, and Pycairo
-- The niri Wayland compositor
+NiriMod работает из коробки на Arch, Fedora, openSUSE и Debian/Ubuntu. Нужно:
+- Python 3.12+ и `uv` (скрипт установки поставит `uv` автоматически)
+- GTK4, libadwaita, PyGObject и Pycairo
+- wayland-композитор niri
 
-**Gentoo Users** (requires the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) for `niri`):
+**Пользователи Gentoo** (требуется оверлей [GURU](https://wiki.gentoo.org/wiki/Project:GURU) для `niri`):
 ```bash
 emerge dev-vcs/git net-misc/curl dev-lang/python gui-libs/gtk gui-libs/libadwaita dev-python/pygobject dev-python/pycairo x11-libs/libxkbcommon x11-misc/xkeyboard-config
 curl -sSL https://raw.githubusercontent.com/srinivasr/nirimod/main/install.sh | bash -s -- --install --skip-deps
@@ -135,18 +113,10 @@ curl -sSL https://raw.githubusercontent.com/srinivasr/nirimod/main/install.sh | 
 
 ---
 
-## Contributing
+## Вклад в проект
 
-Contributions are always welcome. If you would like to help out, please check the [CONTRIBUTING.md](CONTRIBUTING.md) file for setup instructions. If you are planning a major change, please open an issue first so we can discuss it.
-
-<a href="https://www.star-history.com/?repos=srinivasr%2Fnirimod&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=srinivasr/nirimod&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=srinivasr/nirimod&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=srinivasr/nirimod&type=date&legend=top-left" />
- </picture>
-</a>
+Любая помощь приветствуется. Перед крупными изменениями, пожалуйста, откройте issue для обсуждения.
 
 ---
 
-*NiriMod is an independent project and is not affiliated with the official niri team.*
+*NiriMod — независимый проект и не связан с официальной командой niri.*
