@@ -114,12 +114,14 @@ class PackagesPage(BasePage):
 
         self._nix_installed_grp = Adw.PreferencesGroup(title="Установленные пакеты")
         box.append(self._nix_installed_grp)
+        self._installed_rows: list[Gtk.Widget] = []
 
         self._nix_popular_grp = Adw.PreferencesGroup(title="Популярные пакеты")
         box.append(self._nix_popular_grp)
 
         self._nix_results_grp = Adw.PreferencesGroup(title="Результаты поиска")
         box.append(self._nix_results_grp)
+        self._search_rows: list[Gtk.Widget] = []
 
         self._populate_popular()
 
@@ -144,7 +146,7 @@ class PackagesPage(BasePage):
 
     def _do_search(self, query: str):
         self._set_busy(True, "Поиск\u2026")
-        self._clear_group(self._nix_results_grp)
+        self._clear_group(self._nix_results_grp, self._search_rows)
         self._backend.search(
             query,
             on_output=self._append_log,
@@ -159,9 +161,11 @@ class PackagesPage(BasePage):
             return
         suffix = " (из кэша)" if cached else ""
         self._set_status(f"Найдено: {len(results or [])}{suffix}")
-        self._clear_group(self._nix_results_grp)
+        self._clear_group(self._nix_results_grp, self._search_rows)
         for res in results or []:
-            self._nix_results_grp.add(self._make_result_row(res, label="Установить"))
+            row = self._make_result_row(res, label="Установить")
+            self._search_rows.append(row)
+            self._nix_results_grp.add(row)
 
     def _make_result_row(self, res: SearchResult, label: str = "Установить") -> Adw.ActionRow:
         row = Adw.ActionRow(
@@ -194,9 +198,10 @@ class PackagesPage(BasePage):
 
     def _reload_installed(self):
         installed = self._backend.installed_packages()
-        self._clear_group(self._nix_installed_grp)
+        self._clear_group(self._nix_installed_grp, self._installed_rows)
         if not installed:
             row = Adw.ActionRow(title="Пакетов не найдено")
+            self._installed_rows.append(row)
             self._nix_installed_grp.add(row)
             return
         for pkg in installed:
@@ -210,6 +215,7 @@ class PackagesPage(BasePage):
                 "clicked", lambda *_, p=pkg: self._remove_package(p)
             )
             row.add_suffix(remove_btn)
+            self._installed_rows.append(row)
             self._nix_installed_grp.add(row)
 
     def _remove_package(self, pkg):
@@ -308,13 +314,13 @@ class PackagesPage(BasePage):
             self._log_buffer.insert(self._log_buffer.get_end_iter(), line + "\n")
 
     @staticmethod
-    def _clear_group(group: Adw.PreferencesGroup):
-        """Remove all preference rows from a group.
+    def _clear_group(group: Adw.PreferencesGroup, rows: list[Gtk.Widget]):
+        """Remove exactly the rows we previously added.
 
-        ``Adw.PreferencesGroup`` does not expose a public row iterator, and
-        ``get_first_child()`` returns internal boxes.  The reliable way is to
+        ``Adw.PreferencesGroup`` has no public row iterator and
+        ``get_first_child()``/``list(group)`` return the internal box, so we
         keep a reference to every row we add and remove those directly.
         """
-        rows = list(group)
         for row in rows:
             group.remove(row)
+        rows.clear()
