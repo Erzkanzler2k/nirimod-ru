@@ -48,6 +48,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
 
   postInstall = ''
     install -Dm644 data/nirimod.svg $out/share/icons/hicolor/scalable/apps/nirimod.svg
+    install -Dm644 data/addons.json $out/${python3Packages.python.sitePackages}/data/addons.json
 
     mkdir -p $out/share/applications
     cat > $out/share/applications/io.github.nirimod.desktop << EOF

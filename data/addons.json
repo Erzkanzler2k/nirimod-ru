@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "addons": [
+    {
+      "id": "dank-material-shell",
+      "name": "Dank Material Shell (DMS)",
+      "description": "Визуальная оболочка для niri: рабочая область в виде мозаики, виджеты, сенсорные жесты. Интегрируется с NiriMod.",
+      "category": "Оболочки",
+      "repo": "https://github.com/xintrea/dank-material-shell",
+      "install": [
+        "git clone --depth 1 https://github.com/xintrea/dank-material-shell ~/.local/share/dank-material-shell",
+        "~/.local/share/dank-material-shell/install/install.sh"
+      ],
+      "remove": [
+        "rm -rf ~/.local/share/dank-material-shell"
+      ]
+    },
+    {
+      "id": "noctalia",
+      "name": "Noctalia",
+      "description": "Тёмная визуальная оболочка для niri в стиле GNOME. Включает панель, рабочий стол и виджеты.",
+      "category": "Оболочки",
+      "repo": "https://github.com/NoctaliaGroup/niri-noctalia",
+      "install": [
+        "git clone --depth 1 https://github.com/NoctaliaGroup/niri-noctalia ~/.local/share/noctalia",
+        "~/.local/share/noctalia/install.sh"
+      ],
+      "remove": [
+        "rm -rf ~/.local/share/noctalia"
+      ]
+    },
+    {
+      "id": "niri-starter",
+      "name": "Niri Starter",
+      "description": "Готовый набор конфигураций, правил окон и ключевых комбинаций для быстрого старта.",
+      "category": "Конфигурации",
+      "repo": "https://github.com/YaLTeR/niri-starter",
+      "install": [
+        "git clone --depth 1 https://github.com/YaLTeR/niri-starter ~/.local/share/niri-starter"
+      ],
+      "remove": [
+        "rm -rf ~/.local/share/niri-starter"
+      ]
+    },
+    {
+      "id": "niri-wiki",
+      "name": "Niri Wiki (документация)",
+      "description": "Локальная копия официальной документации niri для чтения в браузере.",
+      "category": "Справочники",
+      "repo": "https://github.com/YaLTeR/niri.wiki",
+      "install": [
+        "git clone --depth 1 https://github.com/YaLTeR/niri.wiki ~/.local/share/niri.wiki"
+      ],
+      "remove": [
+        "rm -rf ~/.local/share/niri.wiki"
+      ]
+    }
+  ]
+}

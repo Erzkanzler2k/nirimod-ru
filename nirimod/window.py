@@ -59,6 +59,7 @@ SIDEBAR_GROUPS = [
         "Дополнительно",
         [
             ("raw_config", "text-x-generic-symbolic", "Исходный конфиг"),
+            ("packages", "system-package-install-symbolic", "Пакеты"),
         ],
     ),
 ]
@@ -317,6 +318,7 @@ class NiriModWindow(Adw.ApplicationWindow):
             environment,
             gestures,
             raw_config,
+            packages,
         )
 
         page_builders = {
@@ -332,6 +334,7 @@ class NiriModWindow(Adw.ApplicationWindow):
             "environment": environment.EnvironmentPage,
             "gestures": gestures.GesturesPage,
             "raw_config": raw_config.RawConfigPage,
+            "packages": packages.PackagesPage,
         }
         for page_id, _, title in SIDEBAR_PAGES:
             cls = page_builders.get(page_id)
