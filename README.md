@@ -17,7 +17,17 @@ Editing Niri's configuration file by hand works perfectly fine—until you find 
 
 > **🇷🇺 Русская версия:** этот репозиторий содержит полностью русифицированную сборку NiriMod. Интерфейс переведён на русский язык, а также исправлена работа с конфигурацией на NixOS (см. раздел [NixOS & Home Manager](#nixos--home-manager)).
 
-![NiriMod интерфейс на русском](media/nirimod_ru.png)
+---
+
+## Русская версия
+
+Полная русская локализация интерфейса NiriMod:
+
+- переведены все страницы: мониторы, горячие клавиши, анимации, правила окон, ввод, система и другие;
+- переведены диалоги, тосты и сообщения об ошибках;
+- добавлено исправление для NixOS: сохранение конфигурации работает даже когда файл `config.kdl` — это симлинк на read-only каталог `/nix/store` (см. [NixOS & Home Manager](#nixos--home-manager)).
+
+*Скриншот интерфейса будет добавлен.*
 
 ---
 
@@ -69,7 +79,7 @@ xdg.configFile."niri/config.kdl".source = config.lib.file.mkOutOfStoreSymlink "$
 
 Because NiriMod intelligently follows symlinks during saves, any changes made in the GUI will be written directly to the source file in your dotfiles directory.
 
-> **Исправление для NixOS:** если вы не используете `mkOutOfStoreSymlink` (стандартный вариант Home Manager создаёт симлинк на файл в read-only каталоге `/nix/store`), сохранение через временный файл падает с `OSError: [Errno 30] Read-only file system`. Эта сборка определяет такой случай и пишет изменения через сам симлинк, заменяя его обычным файлом. Учтите, что после первого сохранения связь с Home Manager разрывается — изменения перестанут попадать в `/nix/store`, но продолжат работать в вашем конфиге.
+**Исправление для NixOS (встроено в эту сборку):** если вы не используете `mkOutOfStoreSymlink` (стандартный вариант Home Manager создаёт симлинк на файл в read-only каталоге `/nix/store`), сохранение через временный файл падает с `OSError: [Errno 30] Read-only file system`. Эта сборка определяет такой случай и пишет изменения через сам симлинк, заменяя его обычным файлом. Учтите, что после первого сохранения связь с Home Manager разрывается — изменения перестанут попадать в `/nix/store`, но продолжат работать в вашем конфиге.
 
 ---
 
